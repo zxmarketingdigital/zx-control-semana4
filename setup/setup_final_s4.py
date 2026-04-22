@@ -57,8 +57,8 @@ def main():
     # Carrega config (necessario para Supabase push)
     try:
         config = load_config()
-    except FileNotFoundError:
-        print("  Aviso: config.json nao encontrado. Continuando sem Supabase.")
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"  Aviso: config.json indisponivel ({exc}). Continuando sem Supabase.")
         config = {}
 
     # ------------------------------------------------------------------ [1/8]
@@ -169,7 +169,7 @@ def main():
     print("  ║  ✓ Acesso às versões futuras                         ║")
     print("  ║  ✓ Cancele quando quiser                             ║")
     print("  ║                                                      ║")
-    print("  ║  Link: https://pay.hotmart.com/M105104894U           ║")
+    print("  ║  Link: https://zx-control-renovacao.pages.dev/       ║")
     print("  ╚══════════════════════════════════════════════════════╝")
     print()
 
