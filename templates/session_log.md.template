@@ -1,0 +1,23 @@
+# Log Sessão S4 — {{DATE}}
+
+**Aluno:** {{STUDENT_EMAIL}}
+**Plataforma:** {{PLATFORM}}
+**Duração:** {{DURATION_MIN}}min {{DURATION_SEC}}s
+**Etapas concluídas:** {{STEPS_DONE}}/10
+
+## Checkpoints
+
+| Etapa | Status | Detalhe | Horário |
+|-------|--------|---------|---------|
+{{CHECKPOINTS_TABLE}}
+
+## Erros encontrados
+
+{{ERRORS_SECTION}}
+
+## Feedback do aluno
+
+{{FEEDBACK}}
+
+---
+*Gerado automaticamente pelo ZX Control S4 — {{TIMESTAMP}}*

@@ -1,0 +1,11 @@
+[Unit]
+Description=ZX LAB Codex Review — {{LABEL}}
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env claude -p /codex:review
+StandardOutput=append:{{LOG_PATH}}
+StandardError=append:{{LOG_PATH}}.err
+
+[Install]
+WantedBy=default.target

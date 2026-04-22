@@ -1,0 +1,30 @@
+<!-- ZX Control 2.0 CTA Block — Template -->
+<div class="cta-s4" style="background: linear-gradient(135deg, #06b6d4, #2563eb); border-radius: 16px; padding: 32px; margin: 24px 0; color: white; text-align: center;">
+  <div style="font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin-bottom: 8px;">
+    🚀 PRÓXIMO NÍVEL
+  </div>
+  <h2 style="font-size: 28px; font-weight: 800; margin: 0 0 8px 0;">ZX Control 2.0</h2>
+  <p style="font-size: 15px; opacity: 0.9; margin: 0 0 24px 0;">
+    Multi-agentes coordenados · Admin Panel · LinkedIn + YouTube + Telegram · ROI automatizado
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px;">
+    <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 16px; font-size: 13px;">
+      🤖 Multi-agentes paralelos
+    </div>
+    <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 16px; font-size: 13px;">
+      📊 Admin Panel visual
+    </div>
+    <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 16px; font-size: 13px;">
+      💰 ROI automatizado
+    </div>
+    <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 16px; font-size: 13px;">
+      🌐 +3 plataformas
+    </div>
+  </div>
+  <a href="__HOTMART_URL__"
+     target="_blank"
+     style="display: inline-block; background: white; color: #2563eb; font-weight: 800; font-size: 16px; padding: 14px 36px; border-radius: 10px; text-decoration: none; margin-bottom: 12px;">
+    GARANTIR VAGA COM 50% OFF
+  </a>
+  <div style="font-size: 12px; opacity: 0.7;">Oferta exclusiva para alunos ZX Control · Vitalício</div>
+</div>
