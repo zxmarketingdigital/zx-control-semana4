@@ -55,65 +55,7 @@ mkdir -p "$HOME/Library/Application Support/Claude/"
 
 ---
 
-## 3. Token Instagram expirado (Etapa 7)
-
-**Sintoma:** O auto-responder para de funcionar com erro `OAuthException` ou `Invalid OAuth access token`.
-
-**Causa:** O token de longa duração expira após 60 dias.
-
-**Solução:** Re-execute o script de setup do Instagram:
-
-```bash
-python3 ~/zx-control-semana4/setup/setup_instagram_app.py --refresh-token
-```
-
-O script vai guiar você pela renovação sem precisar reconfigurar tudo do zero.
-
-Para verificar a validade do token atual:
-
-```bash
-python3 -c "
-import json, os
-cfg = json.load(open(os.path.expanduser('~/.operacao-ia/config/config.json')))
-ig = cfg.get('instagram', {})
-print('Token expira em:', ig.get('token_expires_at', 'desconhecido'))
-"
-```
-
----
-
-## 4. Cron não executa (Etapa 7 — IG Cron)
-
-**Sintoma:** O auto-responder do Instagram não roda automaticamente.
-
-**Verificações:**
-
-```bash
-# Ver se o cron está registrado
-crontab -l | grep ig_auto_responder
-
-# Ver logs de execução
-tail -50 ~/.openclaw/workspace/ig_cron.log
-
-# Testar manualmente
-python3 ~/.openclaw/workspace/scripts/ig_auto_responder.py --dry-run
-```
-
-**Causas comuns:**
-- Path do Python no cron diferente do PATH do usuário — use `which python3` e coloque o caminho absoluto no cron
-- Variáveis de ambiente ausentes — o cron não herda o PATH do shell
-
-**Solução (path absoluto no cron):**
-
-```bash
-crontab -e
-# Adicione no início do crontab:
-PATH=/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin
-```
-
----
-
-## 5. Log não sobe para o Supabase (Etapa 10)
+## 3. Log não sobe para o Supabase (Etapa 8)
 
 **Sintoma:** Sessão finalizada mas nenhum registro aparece na tabela `session_logs_s4`.
 
@@ -143,26 +85,6 @@ O sistema faz retry automático de logs pendentes na próxima execução. Para f
 
 ```bash
 python3 ~/zx-control-semana4/scripts/push_pending_logs.py
-```
-
----
-
-## 6. Rollback da Etapa 7 (remover cron do IG)
-
-Se quiser desfazer o cron do Instagram sem perder outros crons:
-
-```bash
-# Remove apenas a linha do ig_auto_responder
-crontab -l | grep -v ig_auto_responder | crontab -
-
-# Confirmar remoção
-crontab -l
-```
-
-Para rollback completo da Etapa 7 (remove config do Instagram):
-
-```bash
-python3 ~/zx-control-semana4/setup/setup_instagram_app.py --rollback
 ```
 
 ---

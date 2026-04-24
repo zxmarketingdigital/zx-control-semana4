@@ -1,5 +1,0 @@
-# Cron entry para Instagram Auto-Responder
-# Adicionar ao crontab com: crontab -e
-# Executa a cada 30 minutos entre 8h e 22h
-
-*/30 8-22 * * * /usr/bin/python3 __SCRIPT_PATH__ >> __LOG_PATH__ 2>&1

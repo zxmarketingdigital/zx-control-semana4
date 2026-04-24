@@ -33,7 +33,7 @@ import review_orchestrator
 def _print_progress(step, total=8, label=""):
     filled = "█" * step
     empty = "░" * (total - step)
-    print(f"\n  [{filled}{empty}] Etapa 10 de 10")
+    print(f"\n  [{filled}{empty}] Etapa 8 de 8")
     if label:
         print(f"  {label}")
 
@@ -50,7 +50,7 @@ def main():
     print()
     print("  ╔══════════════════════════════════════════════════╗")
     print("  ║  ZX Control — Semana 4                          ║")
-    print("  ║  Etapa 10 — Finalizacao + Log + ZX Control 2.0  ║")
+    print("  ║  Etapa 8 — Finalizacao + Log + ZX Control 2.0   ║")
     print("  ╚══════════════════════════════════════════════════╝")
     print()
 
@@ -131,7 +131,11 @@ def main():
     _sep()
     print()
 
-    resp = input("  Rodar revisao final? [S/n]: ").strip().lower()
+    try:
+        resp = input("  Rodar revisao final? [S/n]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        resp = "n"
+        print("  [non-TTY] Revisao pulada automaticamente.")
     if resp not in ("n", "nao", "no"):
         choice = review_orchestrator.choose()
         review_orchestrator.run_review(choice)
@@ -159,19 +163,34 @@ def main():
     print()
 
     print("  ╔══════════════════════════════════════════════════════╗")
-    print("  ║  Parabens! Semana 4 concluida!                       ║")
     print("  ║                                                      ║")
-    print("  ║  ZX Control 2.0 — Turma 2                            ║")
-    print("  ║  Primeira semana de maio/2026                        ║")
+    print("  ║   PARABENS! Voce concluiu os 30 dias do ZX Control! ║")
     print("  ║                                                      ║")
-    print("  ║  No formato assinatura:                              ║")
-    print("  ║  ✓ 50% OFF vitálicio enquanto ativo                  ║")
-    print("  ║  ✓ Acesso às versões futuras                         ║")
-    print("  ║  ✓ Cancele quando quiser                             ║")
+    print("  ║   Proximo nivel: ZX Control 2.0 — Turma 2            ║")
+    print("  ║   Primeira semana de maio/2026                       ║")
     print("  ║                                                      ║")
-    print("  ║  Link: https://zx-control-renovacao.pages.dev/       ║")
+    print("  ║   Novidades:                                         ║")
+    print("  ║   - Multi-agentes autonomos                          ║")
+    print("  ║   - Admin Panel web                                  ║")
+    print("  ║   - Novas integracoes                                ║")
+    print("  ║                                                      ║")
+    print("  ║   No formato ASSINATURA:                             ║")
+    print("  ║   ✓ 50% OFF vitalicio enquanto ativo                 ║")
+    print("  ║   ✓ Acesso as versoes futuras                        ║")
+    print("  ║   ✓ Cancele quando quiser                            ║")
+    print("  ║                                                      ║")
+    print("  ║   GARANTA SUA VAGA:                                  ║")
+    print("  ║   https://zx-control-renovacao.pages.dev/            ║")
+    print("  ║                                                      ║")
+    print("  ║   © 2026 ZX LAB — Rafael Castro                      ║")
+    print("  ║                                                      ║")
     print("  ╚══════════════════════════════════════════════════════╝")
     print()
+    try:
+        import webbrowser
+        webbrowser.open("https://zx-control-renovacao.pages.dev/")
+    except Exception:
+        pass
 
     # ------------------------------------------------------------------ [8/8]
     _print_progress(8, label="[8/8] Abrir area de membros")
@@ -187,7 +206,7 @@ def main():
         print("  Acesse sua area de membros em: https://zx-control.zxlab.com.br")
 
     # Marca checkpoint
-    mark_checkpoint("step_10_final_s4", "done", "Semana 4 concluida")
+    mark_checkpoint("step_8_final_s4", "done", "Semana 4 concluida")
 
     # Mensagem final
     print()
@@ -196,12 +215,11 @@ def main():
     print("  Semana 4 concluida!")
     print()
     print("  O que voce tem agora:")
-    print("  - Codex revisando projetos automaticamente (3 agendadores)")
+    print("  - Skill /codex-review para revisar projetos sob demanda")
     print("  - Memoria unificada Desktop + Terminal")
     print("  - Skills e MCPs sincronizados")
-    print("  - Graphify mapeando seus projetos")
-    print("  - Instagram no piloto automatico")
-    print("  - Mission Control 2.0 atualizado")
+    print("  - Graphify economizando 60-90% tokens em projetos")
+    print("  - Mission Control 2.0 com dashboard das 4 semanas")
     print()
     print("  Nos vemos na Turma 2 do ZX Control!")
     print()

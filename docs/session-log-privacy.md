@@ -15,7 +15,7 @@ Ao concluir a Semana 4, o sistema registra automaticamente uma sessão de aprend
 
 ## O que NÃO é registrado
 
-- Tokens de acesso (Instagram, Supabase, etc.)
+- Tokens de acesso (Supabase, APIs, etc.)
 - Credenciais ou chaves de API
 - Conteúdo das mensagens enviadas
 - Dados de clientes ou leads

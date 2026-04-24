@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Mission Widgets S4 — widgets de telemetria para o dashboard Mission Control.
-Adiciona blocos Codex, Instagram e Session Log ao dashboard diario.
+Adiciona blocos Codex, Graphify e Session Log ao dashboard diario.
 """
 
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR / "scripts"))
 
-from lib import GRAPHS_DIR, IG_STATE_PATH, SESSION_LOGS_DIR
+from lib import GRAPHS_DIR, SESSION_LOGS_DIR
 
 CODEX_LOGS_DIR = Path.home() / ".codex" / "logs"
 CODEX_PROJECTS_PATH = Path.home() / ".codex" / "automations" / "project-review" / "projects.json"
@@ -26,7 +26,11 @@ def _codex_widget() -> dict:
         result["status"] = "nao configurado"
         return result
 
-    logs = sorted(CODEX_LOGS_DIR.glob("*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
+    logs = sorted(
+        [p for p in CODEX_LOGS_DIR.glob("*.log") if p.exists()],
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
     if logs:
         last = logs[0]
         mtime = datetime.fromtimestamp(last.stat().st_mtime)
@@ -42,33 +46,6 @@ def _codex_widget() -> dict:
             result["projects"] = n
         except Exception:
             pass
-
-    return result
-
-
-def _instagram_widget() -> dict:
-    """Status do auto-responder Instagram."""
-    result = {"label": "Instagram Responder", "status": "desconhecido", "detail": ""}
-
-    if not IG_STATE_PATH.exists():
-        result["status"] = "nao configurado"
-        return result
-
-    try:
-        state = json.loads(IG_STATE_PATH.read_text(encoding="utf-8"))
-        username = state.get("username", "?")
-        token_valid = state.get("token_valid", False)
-        token_expires = state.get("token_expires", "")
-
-        if token_valid:
-            result["status"] = "token valido"
-            result["detail"] = f"@{username} | expira: {token_expires[:10]}"
-        else:
-            result["status"] = "token invalido"
-            result["detail"] = f"@{username} | renovar token"
-    except Exception as exc:
-        result["status"] = "erro"
-        result["detail"] = str(exc)[:80]
 
     return result
 
@@ -103,7 +80,11 @@ def _session_log_widget() -> dict:
     if not SESSION_LOGS_DIR.exists():
         return result
 
-    logs = sorted(SESSION_LOGS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    logs = sorted(
+        [p for p in SESSION_LOGS_DIR.glob("*.json") if p.exists()],
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
     if not logs:
         return result
 
@@ -125,7 +106,6 @@ def collect_all() -> dict:
         "s4_widgets": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
             "codex": _codex_widget(),
-            "instagram": _instagram_widget(),
             "graphify": _graphify_widget(),
             "session_log": _session_log_widget(),
         }
@@ -137,7 +117,7 @@ def print_summary(widgets: dict):
     w = widgets.get("s4_widgets", {})
     print()
     print("  ── ZX Control S4 ──────────────────────")
-    for key in ("codex", "instagram", "graphify", "session_log"):
+    for key in ("codex", "graphify", "session_log"):
         block = w.get(key, {})
         label = block.get("label", key)
         status = block.get("status", "?")

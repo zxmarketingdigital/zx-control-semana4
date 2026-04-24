@@ -26,7 +26,8 @@ def _load_pending():
     """Carrega lista de arquivos pendentes de envio."""
     if PENDING_PATH.exists():
         try:
-            return json.loads(PENDING_PATH.read_text(encoding="utf-8"))
+            data = json.loads(PENDING_PATH.read_text(encoding="utf-8"))
+            return data if isinstance(data, list) else []
         except Exception:
             return []
     return []
@@ -68,6 +69,8 @@ def push(session_json_path, config):
         raise ValueError("Supabase nao configurado — supabase_url ou supabase_anon_key ausentes")
 
     session_json_path = Path(session_json_path)
+    if not session_json_path.exists():
+        raise FileNotFoundError(f"Arquivo de log nao encontrado: {session_json_path}")
     payload_bytes = session_json_path.read_bytes()
 
     url = f"{supabase_url}/functions/v1/session-log-s4"

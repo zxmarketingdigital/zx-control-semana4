@@ -29,7 +29,7 @@ from lib import (
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[██░░░░░░░░] Etapa 3 de 10 — Memoria Desktop <-> Terminal\n")
+    print("\n[██░░░░░░░░] Etapa 3 de 8 — Memoria Desktop <-> Terminal\n")
 
 
 def ask(prompt, secret=False, default=None):
@@ -167,6 +167,11 @@ def handle_macos():
                 mark_checkpoint("step_3_memory_symlink", "skipped", "usuario cancelou reconfiguracao")
                 return
             DESKTOP_MEM.unlink()
+
+    # 3. Se DESKTOP_MEM existe como arquivo regular — remover (nao e um diretorio valido)
+    if DESKTOP_MEM.exists() and not DESKTOP_MEM.is_dir() and not DESKTOP_MEM.is_symlink():
+        print(f"  AVISO: {DESKTOP_MEM} existe como arquivo regular. Removendo...")
+        DESKTOP_MEM.unlink()
 
     # 3. Se DESKTOP_MEM existe como diretorio real — fazer backup + merge
     if DESKTOP_MEM.exists() and DESKTOP_MEM.is_dir():

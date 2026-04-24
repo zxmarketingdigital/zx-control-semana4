@@ -85,18 +85,16 @@ def detect_scheduler():
 def print_plan():
     steps = [
         ("Etapa 1", "Base S4              — Ambiente e estrutura de diretorios (este script)"),
-        ("Etapa 2", "Codex CLI            — Instalacao do Codex e revisor diario agendado"),
-        ("Etapa 3", "Instagram Agents     — Agentes IA para DM e comentarios"),
-        ("Etapa 4", "Knowledge Graphs     — Graphify: base de conhecimento automatizada"),
-        ("Etapa 5", "Multi-Channel Scale  — Escala simultânea WhatsApp + Email + Instagram"),
-        ("Etapa 6", "Analytics Engine     — Dashboard de metricas consolidadas"),
-        ("Etapa 7", "A/B Testing          — Teste automatico de copys e sequencias"),
-        ("Etapa 8", "Autonomia Total      — Agente 24/7 sem intervencao manual"),
-        ("Etapa 9", "Integracao CRM       — Sincronizacao bidirecional com CRM"),
-        ("Etapa 10", "Finalizacao S4      — Auditoria final e proximos passos"),
+        ("Etapa 2", "Codex               — Skill /codex-review + Automacao opt-in"),
+        ("Etapa 3", "Memoria             — Desktop <-> Terminal sincronizados"),
+        ("Etapa 4", "Skills e MCPs       — Sync em Git com push agendado"),
+        ("Etapa 5", "Graphify            — Economia de 60-90% tokens + Claude mais rapido"),
+        ("Etapa 6", "Mission Control 2.0 — Dashboard com todas as semanas"),
+        ("Etapa 7", "Auditoria Tecnica   — Verificacao dos 11 componentes"),
+        ("Etapa 8", "Finalizacao         — Log final + ZX Control 2.0"),
     ]
     print()
-    print("  Plano completo — 10 etapas:")
+    print("  Plano completo — 8 etapas:")
     print()
     for label, desc in steps:
         print(f"    {label}: {desc}")
@@ -105,17 +103,20 @@ def print_plan():
 
 def main():
     print()
-    print("=" * 52)
-    print("  ZX Control — Semana 4: Inteligencia & Escala")
-    print("=" * 52)
+    print("  ╔══════════════════════════════════════════════════════╗")
+    print("  ║                                                      ║")
+    print("  ║   ZX LAB — Rafael Castro                             ║")
+    print("  ║   ZX Control — Semana 4: Inteligencia & Escala      ║")
+    print("  ║                                                      ║")
+    print("  ║   © 2026 ZX LAB · Todos os direitos reservados       ║")
+    print("  ║   Reproducao ou redistribuicao sem autorizacao       ║")
+    print("  ║   expressa e proibida.                               ║")
+    print("  ║                                                      ║")
+    print("  ╚══════════════════════════════════════════════════════╝")
     print()
-    print("  [█░░░░░░░░░] Etapa 1 de 10")
+    print("  [█░░░░░░░░] Etapa 1 de 8")
     print()
-    print("  Bem-vindo(a) ao setup da Semana 4!")
-    print()
-    print("  Nesta semana voce vai expandir sua operacao IA para")
-    print("  escala real: Codex CLI, agentes Instagram, grafos de")
-    print("  conhecimento, analytics e autonomia 24/7.")
+    print("  Bem-vindo(a) a ultima semana do ZX Control!")
     print()
 
     # --- Carrega config e valida fases anteriores ---
@@ -181,7 +182,7 @@ def main():
         print(f"  [OK] {label}: {dir_path}")
     print()
 
-    # --- Plano das 10 etapas ---
+    # --- Plano das 8 etapas ---
     print_plan()
 
     # --- PROMO ---

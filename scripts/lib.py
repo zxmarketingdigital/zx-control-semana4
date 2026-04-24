@@ -39,8 +39,6 @@ WEEK4_LOGS_DIR = LOGS_DIR / "week4"
 CODEX_DIR = Path.home() / ".codex"
 CODEX_AUTOMATIONS_DIR = CODEX_DIR / "automations"
 CODEX_PROJECT_REVIEW_DIR = CODEX_AUTOMATIONS_DIR / "project-review"
-IG_STATE_PATH = Path.home() / ".openclaw" / "workspace" / "ig_state.json"
-IG_ENV_PATH = Path.home() / ".openclaw" / "workspace" / ".env"
 GRAPHS_DIR = BASE_DIR / "graphs"
 SESSION_LOGS_DIR = DATA_DIR / "logs"
 
@@ -60,7 +58,6 @@ def ensure_structure():
         CODEX_DIR,
         CODEX_AUTOMATIONS_DIR,
         CODEX_PROJECT_REVIEW_DIR,
-        IG_STATE_PATH.parent,
         GRAPHS_DIR,
         SESSION_LOGS_DIR,
     ]:
@@ -70,7 +67,10 @@ def ensure_structure():
 def load_config():
     if not CONFIG_PATH.exists():
         raise FileNotFoundError("config.json nao encontrado em ~/.operacao-ia/config/")
-    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    try:
+        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"config.json invalido (JSON malformado): {exc}") from exc
 
 
 def save_config(config):
@@ -121,15 +121,18 @@ def save_profile(profile):
 
 
 def open_in_browser(filepath):
-    """Abre arquivo no browser de forma cross-platform."""
+    """Abre arquivo no browser de forma cross-platform. Falhas sao silenciosas."""
     import subprocess
     path_str = str(filepath)
-    if PLATFORM == "Darwin":
-        subprocess.run(["open", path_str])
-    elif PLATFORM == "Windows":
-        subprocess.run(["start", path_str], shell=True)
-    else:
-        subprocess.run(["xdg-open", path_str])
+    try:
+        if PLATFORM == "Darwin":
+            subprocess.run(["open", path_str], check=False)
+        elif PLATFORM == "Windows":
+            subprocess.run(["start", path_str], shell=True, check=False)
+        else:
+            subprocess.run(["xdg-open", path_str], check=False)
+    except FileNotFoundError:
+        pass  # browser ou comando nao disponivel — ignorar
 
 
 def mask_phone(phone):

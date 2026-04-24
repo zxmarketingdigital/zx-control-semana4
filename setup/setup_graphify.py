@@ -28,7 +28,7 @@ from lib import (
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[████░░░░░░] Etapa 5 de 10 — Graphify: Segundo Cerebro\n")
+    print("\n[█████░░░] Etapa 5 de 8 — Graphify: Economia de Tokens + Velocidade\n")
 
 
 def ask(prompt, secret=False, default=None):
@@ -140,8 +140,11 @@ def select_project(projects):
         candidate = Path.home() / "projetos" / slug_input
         if candidate.exists():
             return slug_input, str(candidate)
-        # Usa como slug customizado com operacao-ia path
-        return slugify(slug_input), str(default_path / slug_input)
+        # Usa como slug customizado mas avisa se o path nao existe
+        custom_path = default_path / slug_input
+        if not custom_path.exists():
+            print(f"  AVISO: '{custom_path}' nao existe. Graphify criara a estrutura.")
+        return slugify(slug_input), str(custom_path)
 
     return default_slug, str(default_path)
 
@@ -236,6 +239,11 @@ def run_graphify_now(project_path, skill_available):
     print(f"  (timeout: 120s)")
     print()
 
+    if not Path(str(project_path)).exists():
+        print(f"  ERRO: pasta do projeto nao existe: {project_path}")
+        print("  Crie a pasta primeiro e execute /graphify manualmente.")
+        return
+
     try:
         result = subprocess.run(
             ["claude", "-p", "/graphify"],
@@ -269,10 +277,19 @@ def main():
     print()
     progress_bar()
 
-    print("  Etapa 5 — Graphify: Segundo Cerebro")
+    print("  Etapa 5 — Graphify: Economia de Tokens + Velocidade")
     print()
-    print("  O Graphify transforma codigo e documentacao em knowledge graphs,")
-    print("  criando um mapa visual de todo o seu projeto para o Claude.")
+    print("  [OK] Graphify — economia de tokens + Claude mais rapido")
+    print()
+    print("  O que voce ganha:")
+    print("  - Economia de 60-90% de tokens em perguntas sobre projetos")
+    print("  - Claude responde mais rapido (contexto pre-indexado)")
+    print("  - Claude mais inteligente (entende dependencias entre arquivos)")
+    print()
+    print("  Como funciona:")
+    print("  - Cada projeto vira um knowledge graph consultavel")
+    print("  - O Claude consulta o grafo antes de responder")
+    print("  - Voce nao precisa mais colar codigo ou repetir contexto")
     print()
 
     ensure_structure()

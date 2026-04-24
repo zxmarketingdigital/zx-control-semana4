@@ -25,7 +25,7 @@ MISSION_DIR = Path.home() / ".zxlab-mission-control"
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[███████░░░] Etapa 8 de 10 — Mission Control 2.0\n")
+    print("\n[██████░░] Etapa 6 de 8 — Mission Control 2.0\n")
 
 
 # ---------------------------------------------------------------------------
@@ -81,16 +81,6 @@ def _collect_week4_widgets():
         widgets["graphify_graphs"] = len(list(graphs_dir.glob("*/graph.json")))
     else:
         widgets["graphify_graphs"] = 0
-    # Instagram auto replies
-    ig_state = Path.home() / ".openclaw" / "workspace" / "ig_state.json"
-    if ig_state.exists():
-        try:
-            data = json.loads(ig_state.read_text())
-            widgets["ig_auto_replies_24h"] = data.get("replies_today", 0)
-        except Exception:
-            widgets["ig_auto_replies_24h"] = 0
-    else:
-        widgets["ig_auto_replies_24h"] = 0
     return widgets
 '''
 
@@ -123,7 +113,6 @@ S4_AGENTS = [
     "com.zxlab.codex-review-daily",
     "com.zxlab.codex-review-morning",
     "com.zxlab.codex-review-weekly",
-    "com.zxlab.ig-auto-responder",
 ]
 
 HEARTBEAT_S4_MARKER = "codex-review-daily"
@@ -134,7 +123,6 @@ _S4_EXPECTED_AGENTS = [
     "com.zxlab.codex-review-daily",
     "com.zxlab.codex-review-morning",
     "com.zxlab.codex-review-weekly",
-    "com.zxlab.ig-auto-responder",
 ]
 '''
 
@@ -169,10 +157,7 @@ HEALTH_S4_BLOCK = '''
 # ZX Control S4 Skills
 _S4_SKILLS = [
     "/codex-review",
-    "/graph-refresh",
-    "/ig-status",
-    "/ig-pausar",
-    "/ig-retomar",
+    "/graphify",
 ]
 '''
 
@@ -207,7 +192,6 @@ BACKUP_S4_MARKER = "# ZX Control S4 Backup"
 BACKUP_NEW_ENTRIES = [
     "    # ZX Control S4 Backup\n",
     "    '~/.codex/',\n",
-    "    '~/.openclaw/workspace/.env',\n",
 ]
 
 # Anchor: ultima linha da lista BACKUP_TARGETS (antes do fechamento '])
@@ -215,7 +199,7 @@ BACKUP_LIST_CLOSE = "]\n"
 
 
 def patch_config_backup(n_aplicados):
-    """Patch 4: adiciona ~/.codex/ e ~/.openclaw/workspace/.env ao config-backup.py."""
+    """Patch 4: adiciona ~/.codex/ ao config-backup.py."""
     target = MISSION_DIR / "config-backup.py"
     content = _read_file(target)
 
@@ -232,7 +216,6 @@ def patch_config_backup(n_aplicados):
         "\n\n# ZX Control S4 Backup — paths adicionais\n"
         "_S4_BACKUP_PATHS = [\n"
         "    '~/.codex/',\n"
-        "    '~/.openclaw/workspace/.env',\n"
         "]\n"
         "# Mesclar com BACKUP_TARGETS em runtime\n"
         "try:\n"
@@ -249,6 +232,76 @@ def patch_config_backup(n_aplicados):
 
 
 # ---------------------------------------------------------------------------
+# Patch 5 — Regenerar dashboard HTML com todas as semanas
+# ---------------------------------------------------------------------------
+
+import json as _json
+
+DASHBOARD_HTML_PATH = Path.home() / ".operacao-ia" / "mission-control" / "index.html"
+CONFIG_DIR = Path.home() / ".operacao-ia" / "config"
+
+
+def _load_week_checkpoint(n):
+    p = CONFIG_DIR / f"week{n}_checkpoint.json"
+    if not p.exists():
+        return None
+    try:
+        return _json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _load_global_config():
+    p = CONFIG_DIR / "config.json"
+    try:
+        return _json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _render_week_card(n, data):
+    if not data:
+        return f'<div class="week-card"><h3>Semana {n}</h3><p>Checkpoint ausente.</p></div>'
+    steps = data.get("steps", {})
+    rows = []
+    for key, val in sorted(steps.items()):
+        status = val.get("status", "pending")
+        badge = {"done": "✅", "skipped": "⏭", "pending": "⏳"}.get(status, "❓")
+        detail = (val.get("detail") or "")[:80]
+        rows.append(
+            f'<tr><td>{badge}</td><td>{key}</td><td>{status}</td><td>{detail}</td></tr>'
+        )
+    return (
+        f'<div class="week-card"><h3>Semana {n}</h3>'
+        f'<table>{"".join(rows)}</table></div>'
+    )
+
+
+def regenerate_dashboard_html():
+    cfg = _load_global_config()
+    phase = cfg.get("phase_completed", 0)
+    weeks_html = "".join(
+        _render_week_card(n, _load_week_checkpoint(n)) for n in (1, 2, 3, 4)
+    )
+    html = (
+        '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+        '<title>Mission Control — ZX Control</title>'
+        '<style>body{font-family:-apple-system,sans-serif;background:#0a0a0f;color:#e8e8ed;padding:2rem}'
+        '.week-card{background:#16161f;border:1px solid #1e1e2e;border-radius:8px;padding:1.5rem;margin-bottom:1rem}'
+        'h1{background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}'
+        'table{width:100%;border-collapse:collapse;margin-top:1rem}'
+        'td{padding:0.5rem;border-bottom:1px solid #1e1e2e}</style></head><body>'
+        '<h1>Mission Control — ZX Control · ZX LAB</h1>'
+        f'<p>Fase atual: Semana {phase} · © 2026 ZX LAB</p>'
+        f'{weeks_html}</body></html>'
+    )
+    DASHBOARD_HTML_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DASHBOARD_HTML_PATH.write_text(html, encoding="utf-8")
+    print(f"  [OK] Dashboard regenerado: {DASHBOARD_HTML_PATH}")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -260,9 +313,9 @@ def main():
     print()
     progress_bar()
 
-    print("  Etapa 8 — Mission Control 2.0")
+    print("  Etapa 6 — Mission Control 2.0")
     print()
-    print("  Aplica 4 patches ao ~/.zxlab-mission-control/ para")
+    print("  Aplica 5 patches ao ~/.zxlab-mission-control/ para")
     print("  monitorar os sistemas instalados na Semana 4.")
     print()
 
@@ -276,8 +329,8 @@ def main():
         print("  Para instalar o Mission Control, acesse:")
         print("  https://github.com/zxmarketingdigital/zxlab-mission-control")
         print()
-        mark_checkpoint("step_8_mission_control", "done", "patches: 0/4 (MISSION_DIR ausente)")
-        print("  [OK] Etapa 8 concluida — Mission Control nao encontrado (no-op).\n")
+        mark_checkpoint("step_6_mission_control", "done", "patches: 0/5 (MISSION_DIR ausente)")
+        print("  [OK] Etapa 6 concluida — Mission Control nao encontrado (no-op).\n")
         return
 
     print(f"  Mission Control encontrado: {MISSION_DIR}")
@@ -313,14 +366,22 @@ def main():
     except Exception as e:
         print(f"  ERRO no patch 4: {e}")
 
+    # Patch 5 — regenerar dashboard HTML
+    print("  Patch 5 — Regenerar dashboard HTML (todas as semanas)...")
+    try:
+        regenerate_dashboard_html()
+        n_aplicados += 1
+    except Exception as e:
+        print(f"  ERRO no patch 5: {e}")
+
     print()
-    print(f"  Resultado: {n_aplicados}/4 patches aplicados")
+    print(f"  Resultado: {n_aplicados}/5 patches aplicados")
     print()
 
-    mark_checkpoint("step_8_mission_control", "done", f"patches: {n_aplicados}/4")
+    mark_checkpoint("step_6_mission_control", "done", f"patches: {n_aplicados}/5")
 
-    print("  [OK] Etapa 8 concluida — Mission Control 2.0 atualizado!\n")
-    print("  Proximo passo: Etapa 9 — Auditoria Tecnica")
+    print("  [OK] Etapa 6 concluida — Mission Control 2.0 atualizado!\n")
+    print("  Proximo passo: Etapa 7 — Auditoria Tecnica")
     print("  Execute: python3 setup/setup_audit_s4.py")
     print()
 

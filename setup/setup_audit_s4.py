@@ -35,7 +35,7 @@ MISSION_DIR = Path.home() / ".zxlab-mission-control"
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[█████████░] Etapa 9 de 10 — Auditoria Tecnica\n")
+    print("\n[███████░] Etapa 7 de 8 — Auditoria Tecnica\n")
 
 
 # ---------------------------------------------------------------------------
@@ -170,59 +170,6 @@ def check_graphify_dir():
     return ("AVISO", f"diretorio existe mas vazio: {graphs}")
 
 
-def check_ig_token():
-    """Check 7: ig_state.json com token_valid == true."""
-    ig_state = Path.home() / ".openclaw" / "workspace" / "ig_state.json"
-    if not ig_state.exists():
-        return ("AVISO", "ig_state.json nao encontrado")
-    try:
-        data = json.loads(ig_state.read_text(encoding="utf-8"))
-        if data.get("token_valid") is True:
-            return ("OK", "token valido")
-        return ("AVISO", f"token_valid={data.get('token_valid')} — executar etapa 5")
-    except Exception as e:
-        return ("ERRO", f"nao foi possivel ler ig_state.json: {e}")
-
-
-def check_ig_responder_script():
-    """Check 8: ig_auto_responder.py existe."""
-    script = Path.home() / ".openclaw" / "workspace" / "scripts" / "ig_auto_responder.py"
-    if script.exists():
-        return ("OK", str(script))
-    return ("AVISO", "ig_auto_responder.py nao encontrado — executar etapa 6")
-
-
-def check_ig_cron():
-    """Check 9: ig_auto_responder agendado (crontab Darwin/Linux ou schtasks Windows)."""
-    if PLATFORM == "Windows":
-        try:
-            result = subprocess.run(
-                ["schtasks", "/query", "/fo", "LIST"],
-                capture_output=True, text=True, timeout=10
-            )
-            if "ig_auto_responder" in result.stdout:
-                return ("OK", "schtasks encontrado")
-            return ("AVISO", "nao encontrado em schtasks")
-        except Exception:
-            return ("AVISO", "nao foi possivel verificar schtasks")
-    else:
-        try:
-            result = subprocess.run(
-                ["crontab", "-l"],
-                capture_output=True, text=True, timeout=10
-            )
-            if "ig_auto_responder" in result.stdout:
-                return ("OK", "entrada no crontab encontrada")
-            # Checar tambem LaunchAgent (macOS)
-            if PLATFORM == "Darwin":
-                plist = LAUNCH_AGENTS_DIR / "com.zxlab.ig-auto-responder.plist"
-                if plist.exists():
-                    return ("OK", "LaunchAgent encontrado")
-            return ("AVISO", "nao encontrado no crontab/LaunchAgent")
-        except Exception:
-            return ("AVISO", "nao foi possivel verificar crontab")
-
-
 def check_codex_launchagent():
     """Check 10: Codex daily LaunchAgent existe (Darwin) ou timer (Linux)."""
     if PLATFORM == "Darwin":
@@ -256,7 +203,7 @@ def check_config_phase():
     """Check 12: config.json com phase >= 3."""
     try:
         config = load_config()
-        phase = config.get("phase", config.get("semana", config.get("week", None)))
+        phase = config.get("phase_completed", config.get("phase", config.get("semana", config.get("week", None))))
         if phase is None:
             return ("AVISO", "campo 'phase' nao encontrado no config.json")
         try:
@@ -273,21 +220,22 @@ def check_config_phase():
 
 
 def check_s4_checkpoints():
-    """Check 13: Checkpoints S4 etapas 1-8 com status done."""
+    """Check 10: Checkpoints S4 etapas 1-8 com status done ou skipped."""
     try:
         cp = load_checkpoint()
         steps = cp.get("steps", {})
         expected = [f"step_{i}" for i in range(1, 9)]
-        done = []
+        done_or_skipped = []
         for key, val in steps.items():
-            # Match qualquer step_N (ex: step_1_base, step_2_codex, etc.)
             for exp in expected:
-                if key.startswith(exp) and val.get("status") == "done":
-                    done.append(key)
+                status = val.get("status")
+                if key.startswith(exp) and status in ("done", "skipped"):
+                    done_or_skipped.append((key, status))
                     break
-        n = len(done)
+        n = len(done_or_skipped)
         if n >= 7:
-            return ("OK", f"{n}/8 etapas concluidas")
+            n_skip = sum(1 for _, s in done_or_skipped if s == "skipped")
+            return ("OK", f"{n}/8 etapas (done+skipped; {n_skip} pulada(s))")
         return ("AVISO", f"{n}/8 etapas concluidas — completar etapas pendentes")
     except Exception as e:
         return ("AVISO", f"nao foi possivel ler checkpoint: {e}")
@@ -324,14 +272,10 @@ CHECKS = [
     ("Skills sync git repo",      check_skills_git),
     ("Skills LaunchAgent",        check_skills_launchagent),
     ("Graphify dir",              check_graphify_dir),
-    ("IG token valido",           check_ig_token),
-    ("IG auto-responder script",  check_ig_responder_script),
-    ("IG cron/agendador",         check_ig_cron),
     ("Codex LaunchAgent daily",   check_codex_launchagent),
     ("Codex projects.json",       check_codex_projects),
     ("Config.json phase >= 3",    check_config_phase),
     ("Checkpoints S4 etapas 1-8", check_s4_checkpoints),
-    ("Mission Control dir",       check_mission_control),
     ("Session logs dir",          check_session_logs_dir),
 ]
 
@@ -363,9 +307,9 @@ def main():
     print()
     progress_bar()
 
-    print("  Etapa 9 — Auditoria Tecnica")
+    print("  Etapa 7 — Auditoria Tecnica")
     print()
-    print("  Verificando 15 componentes instalados nas Semanas 1-4.")
+    print("  Verificando 11 componentes instalados nas Semanas 1-4.")
     print("  Fixes automaticos serao aplicados onde possivel.")
     print()
 
@@ -396,11 +340,11 @@ def main():
         print()
 
     detail = f"{ok}/{TOTAL} checks passaram"
-    mark_checkpoint("step_9_audit_s4", "done", detail)
+    mark_checkpoint("step_7_audit_s4", "done", detail)
 
-    print("  [OK] Etapa 9 concluida — Auditoria Tecnica finalizada!\n")
-    print("  Proximo passo: Etapa 10 — Finalizacao")
-    print("  Execute: python3 setup/setup_base_s4.py --finalize (ou etapa 10)")
+    print("  [OK] Etapa 7 concluida — Auditoria Tecnica finalizada!\n")
+    print("  Proximo passo: Etapa 8 — Finalizacao")
+    print("  Execute: python3 setup/setup_final_s4.py")
     print()
 
 

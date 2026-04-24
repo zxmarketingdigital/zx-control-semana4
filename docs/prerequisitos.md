@@ -83,18 +83,6 @@ Se não estiver instalado:
 
 ---
 
-## 6. Conta Meta Business / Meta Developers
-
-Necessária para as Etapas 6 e 7 (Instagram Automatizado).
-
-- Crie uma conta em [developers.facebook.com](https://developers.facebook.com)
-- Você precisará de uma conta do Instagram Business vinculada à sua Página do Facebook
-- Tenha em mãos o App ID e App Secret do seu aplicativo Meta
-
-Se ainda não tem o app criado, o Setup 6 vai guiar você pelo processo.
-
----
-
 ## Resumo rápido
 
 | Item | Comando de verificação | Mínimo |
@@ -104,6 +92,5 @@ Se ainda não tem o app criado, o Setup 6 vai guiar você pelo processo.
 | Node.js | `node --version` | v20.0.0+ |
 | Python | `python3 --version` | 3.9+ |
 | Git | `git --version` | qualquer |
-| Meta Developers | — | conta criada |
 
 Todos os itens OK? Digite `INICIAR SETUP SEMANA 4` no Claude para começar.

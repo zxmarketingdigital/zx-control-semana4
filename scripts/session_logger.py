@@ -68,7 +68,7 @@ def collect(checkpoint_path):
         except Exception as e:
             errors.append({"step": "_checkpoint_load", "detail": str(e)})
 
-    finished_dt = datetime.now(timezone.utc)
+    finished_dt = datetime.now()
     finished_at = now_iso()
 
     if timestamps:
@@ -102,6 +102,8 @@ def ask_feedback():
     def _input_thread():
         try:
             feedback[0] = input(prompt)
+        except (EOFError, KeyboardInterrupt):
+            feedback[0] = ""
         except Exception:
             feedback[0] = ""
         finally:

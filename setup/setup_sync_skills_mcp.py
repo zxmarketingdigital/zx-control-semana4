@@ -30,7 +30,7 @@ from lib import (
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[███░░░░░░░] Etapa 4 de 10 — Skills e MCPs em Sync\n")
+    print("\n[███░░░░░░░] Etapa 4 de 8 — Skills e MCPs em Sync\n")
 
 
 def ask(prompt, secret=False, default=None):
@@ -282,15 +282,20 @@ def install_sync_agent_linux(sync_script_path):
 
 
 def install_sync_agent_windows(sync_script_path):
-    """Mostra instrucao para schtasks no Windows."""
+    """Mostra instrucao para schtasks no Windows (requer Git Bash ou WSL)."""
+    # Cotas o path para lidar com espacos no caminho do usuario
+    quoted_path = f'"{sync_script_path}"'
+    # Detecta sh via Git Bash ou WSL
+    sh_bin = shutil.which("sh") or r"C:\Program Files\Git\bin\sh.exe"
     print()
-    print("  Windows: execute o comando abaixo para criar tarefa agendada (15 min):")
+    print("  Windows: requer Git Bash (https://git-scm.com) ou WSL com 'sh' no PATH.")
     print()
-    print(f'  schtasks /create /tn "ZXLAB-Skills-Sync" /sc minute /mo 15 /tr "sh {sync_script_path}" /f')
+    print("  Execute como Administrador no PowerShell:")
+    print(f'  schtasks /create /tn "ZXLAB-Skills-Sync" /sc minute /mo 15 /tr "{sh_bin} {sync_script_path}" /f')
     print()
     print("  Ou via PowerShell como Administrador:")
     print(f'  Register-ScheduledTask -TaskName "ZXLAB-Skills-Sync" \\')
-    print(f'    -Action (New-ScheduledTaskAction -Execute "sh" -Argument "{sync_script_path}") \\')
+    print(f'    -Action (New-ScheduledTaskAction -Execute "{sh_bin}" -Argument {quoted_path}) \\')
     print(f'    -Trigger (New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Minutes 15) -Once -At (Get-Date))')
 
 

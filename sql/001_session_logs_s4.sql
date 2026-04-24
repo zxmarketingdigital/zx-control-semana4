@@ -22,18 +22,30 @@ CREATE TABLE IF NOT EXISTS session_logs_s4 (
 ALTER TABLE session_logs_s4 ENABLE ROW LEVEL SECURITY;
 
 -- Apenas service_role pode inserir (edge function usa service key)
-CREATE POLICY IF NOT EXISTS "service_role_insert"
-  ON session_logs_s4
-  FOR INSERT
-  TO service_role
-  WITH CHECK (true);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'session_logs_s4' AND policyname = 'service_role_insert'
+  ) THEN
+    CREATE POLICY "service_role_insert"
+      ON session_logs_s4
+      FOR INSERT
+      TO service_role
+      WITH CHECK (true);
+  END IF;
+END $$;
 
 -- Authenticated users podem ler todos os logs (para admin dashboard)
-CREATE POLICY IF NOT EXISTS "authenticated_read"
-  ON session_logs_s4
-  FOR SELECT
-  TO authenticated
-  USING (true);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'session_logs_s4' AND policyname = 'authenticated_read'
+  ) THEN
+    CREATE POLICY "authenticated_read"
+      ON session_logs_s4
+      FOR SELECT
+      TO authenticated
+      USING (true);
+  END IF;
+END $$;
 
 -- Indices para queries frequentes
 CREATE INDEX IF NOT EXISTS idx_session_logs_s4_created_at ON session_logs_s4(created_at DESC);

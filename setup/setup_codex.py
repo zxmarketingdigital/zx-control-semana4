@@ -6,6 +6,7 @@ cria projeto de revisao e configura agentes agendados.
 """
 
 import json
+import shlex
 import shutil
 import subprocess
 import sys
@@ -71,7 +72,7 @@ LAUNCH_AGENTS = [
 # ---------------------------------------------------------------------------
 
 def progress_bar():
-    print("\n[██░░░░░░░░] Etapa 2 de 10 — Codex CLI + Revisor Diario\n")
+    print("\n[██░░░░░░] Etapa 2 de 8 — Codex CLI + Revisor Diario\n")
 
 
 def _run(cmd, capture=True):
@@ -136,7 +137,12 @@ def ensure_codex_plugin():
     print("  Ou execute no terminal:")
     print(f"    claude plugin install {PLUGIN_URL}")
     print()
-    confirm = input("  Plugin ja instalado manualmente? [s/n]: ").strip().lower()
+    try:
+        confirm = input("  Plugin ja instalado manualmente? [s/n]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        confirm = "n"
+        print("  [non-TTY] Instalacao automatica falhou. Aluno deve rodar manualmente:")
+        print(f"    claude plugin install {PLUGIN_URL}")
     return confirm in ("s", "sim", "y", "yes")
 
 
@@ -207,9 +213,13 @@ def update_projects_json():
 
 def _plist_content(agent):
     """Gera conteudo XML do plist para um LaunchAgent."""
-    args_xml = "".join(
-        f"    <string>{a}</string>\n" for a in ["/usr/bin/env"] + agent["args"]
-    )
+    # Resolve caminho absoluto do claude (launchd nao herda PATH do shell)
+    claude_bin = shutil.which("claude") or "/usr/local/bin/claude"
+    args = [claude_bin] + agent["args"][1:]  # substitui "claude" pelo path absoluto
+    args_xml = "".join(f"    <string>{a}</string>\n" for a in args)
+    # Expande ~ — launchd nao interpreta ~ em StandardOutPath/StandardErrorPath
+    log_path = agent["log"].replace("~", str(Path.home()))
+    err_path = agent["err"].replace("~", str(Path.home()))
     interval_key = "StartCalendarInterval"
     interval_dict = (
         f"  <key>{interval_key}</key>\n"
@@ -237,9 +247,9 @@ def _plist_content(agent):
         "  </array>\n"
         + interval_dict +
         "  <key>StandardOutPath</key>\n"
-        f"  <string>{agent['log']}</string>\n"
+        f"  <string>{log_path}</string>\n"
         "  <key>StandardErrorPath</key>\n"
-        f"  <string>{agent['err']}</string>\n"
+        f"  <string>{err_path}</string>\n"
         "</dict>\n"
         "</plist>\n"
     )
@@ -275,7 +285,8 @@ def install_launch_agents():
 # ---------------------------------------------------------------------------
 
 def _systemd_service(agent):
-    cmd = " ".join(agent["args"])
+    # shlex.join preserva agrupamento de args com espacos (ex: "-p /codex:review --effort medium")
+    cmd = shlex.join(agent["args"])
     return (
         "[Unit]\n"
         f"Description=ZX LAB Codex Review ({agent['label']})\n\n"
@@ -357,7 +368,7 @@ def install_windows_tasks():
         cmd = [
             "schtasks", "/create",
             "/tn", tn,
-            "/tr", " ".join(agent["args"]),
+            "/tr", shlex.join(agent["args"]),
             "/sc", *schedule,
             "/st", time_str,
             "/f",
@@ -375,6 +386,23 @@ def install_windows_tasks():
                 print(f"  [AVISO] Falha ao criar task {tn}: {err}")
 
     return registrados
+
+
+# ---------------------------------------------------------------------------
+# Instalar skill /codex-review
+# ---------------------------------------------------------------------------
+
+def install_skill_codex_review():
+    """Copia skills/codex-review/SKILL.md para ~/.claude/skills/codex-review/."""
+    src = ROOT_DIR / "skills" / "codex-review" / "SKILL.md"
+    dst = Path.home() / ".claude" / "skills" / "codex-review" / "SKILL.md"
+    if not src.exists():
+        print(f"  [AVISO] SKILL.md nao encontrado em {src}")
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(src, dst)
+    print(f"  [OK] Skill /codex-review instalada em {dst}")
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -426,32 +454,50 @@ def main():
         print("  Instale manualmente e re-execute este script se necessario.")
     print()
 
-    # 3. Criar/atualizar projects.json
+    # 3. Instalar skill complementar
+    print("  Instalando skill /codex-review...")
+    skill_ok = install_skill_codex_review()
+    print()
+
+    # 4. Criar/atualizar projects.json
     print("  Configurando projeto de revisao...")
     projects_path = update_projects_json()
     print()
 
-    # 4. Instalar agendadores
-    print("  Instalando agendadores automaticos...")
+    # 5. Perguntar se quer automacao agendada (OPT-IN)
+    print("  OPCIONAL: Automacao de revisao agendada")
+    print("  - Revisao diaria (09h), semanal (seg 08h30), profunda (dom 22h)")
+    print("  - Voce pode rodar manualmente a qualquer hora com /codex-review")
     print()
-    registrados = install_schedulers()
-    print()
+    try:
+        resp = input("  Instalar automacao agendada? [s/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        resp = "n"
+        print("  [non-TTY] Pulando automacao — use /codex-review manualmente.")
 
-    if registrados >= 1:
-        print(f"  [OK] {registrados}/3 agendadores registrados.")
+    if resp in ("s", "sim", "y", "yes"):
+        print()
+        print("  Instalando agendadores automaticos...")
+        print()
+        registrados = install_schedulers()
+        print()
+        if registrados >= 1:
+            print(f"  [OK] {registrados}/3 agendadores registrados.")
+            print()
+            print("  Agendamentos configurados:")
+            for agent in LAUNCH_AGENTS:
+                print(f"    - {agent['description']}")
+        else:
+            print("  [AVISO] Nenhum agendador registrado. Verifique permissoes.")
     else:
-        print("  [AVISO] Nenhum agendador registrado. Verifique permissoes e tente novamente.")
-    print()
-
-    # 5. Resumo
-    print("  Agendamentos configurados:")
-    for agent in LAUNCH_AGENTS:
-        print(f"    - {agent['description']}")
+        registrados = 0
+        print("  [OK] Automacao pulada. Use /codex-review quando precisar.")
     print()
 
     # 6. Checkpoint
     plugin_str = "ok" if plugin_ok else "manual"
-    detail = f"plugin:{plugin_str} projetos:{projects_path} agendadores:{registrados}"
+    skill_str = "ok" if skill_ok else "falha"
+    detail = f"plugin:{plugin_str} skill:{skill_str} agendadores:{registrados}"
     mark_checkpoint("step_2_codex", "done", detail)
 
     print("  [OK] Etapa 2 concluida!")

@@ -6,12 +6,11 @@
 > "Ola! Sou o Claude e vou transformar sua operacao em uma maquina de inteligencia e escala.
 >
 > Ao final desta sessao voce tera:
-> - Codex revisando seus projetos automaticamente (economiza 60-90% tokens em revisao)
+> - Codex como revisor sob demanda (/codex-review) + automacao opt-in
 > - Memoria unificada Claude Desktop + Terminal (sem perda de contexto)
 > - Skills e MCPs sincronizados entre maquinas
-> - Graphify construindo o segundo cerebro de cada projeto
-> - Auto-responder no Instagram (comentarios e DMs automaticos)
-> - Mission Control 2.0 com widgets novos
+> - Graphify economizando 60-90% tokens em perguntas sobre projetos
+> - Mission Control 2.0 com dashboard de todas as semanas
 > - Log da sessao enviado automaticamente pro Supabase
 >
 > Quando estiver pronto, digite: **INICIAR SETUP SEMANA 4**"
@@ -41,7 +40,7 @@ Voce e o instrutor de setup da Semana 4. Seu papel e levar o aluno de uma operac
 
 ## Etapa 1 — Boas-vindas + Base
 
-`[█░░░░░░░░░] Etapa 1 de 10`
+`[█░░░░░░░] Etapa 1 de 8`
 
 ### O que e
 Verificacao inicial do ambiente e criacao das pastas necessarias para a Semana 4.
@@ -63,7 +62,7 @@ O script vai:
 - Detectar o sistema operacional (macOS/Windows/Linux)
 - Verificar Python no PATH
 - Criar subpastas para inteligencia e escala (week4, graphs, codex, ig)
-- Mostrar plano das 10 etapas com beneficios
+- Mostrar plano das 8 etapas com beneficios
 
 Apos o script terminar:
 - Confirme ao aluno que a estrutura esta pronta
@@ -74,7 +73,7 @@ Apos o script terminar:
 
 ## Etapa 2 — Codex Plugin + Revisor Diario
 
-`[██░░░░░░░░] Etapa 2 de 10`
+`[██░░░░░░] Etapa 2 de 8`
 
 ### O que e
 Um revisor automatico que analisa seus projetos todos os dias e gera um relatorio de saude da operacao.
@@ -113,7 +112,7 @@ Pronto para a Etapa 3?"
 
 ## Etapa 3 — Memoria Desktop <-> Terminal
 
-`[███░░░░░░░] Etapa 3 de 10`
+`[███░░░░░] Etapa 3 de 8`
 
 ### O que e
 Uma ponte que faz o Claude Desktop e o Claude no Terminal compartilharem a mesma memoria — sem precisar repetir contexto ao trocar de ambiente.
@@ -151,7 +150,7 @@ Pronto para a Etapa 4?"
 
 ## Etapa 4 — Skills e MCPs em Sync
 
-`[████░░░░░░] Etapa 4 de 10`
+`[████░░░░] Etapa 4 de 8`
 
 ### O que e
 Um sincronizador que mantem suas skills e ferramentas (MCPs) identicas entre todas as maquinas onde voce usa o Claude.
@@ -187,7 +186,7 @@ Pronto para a Etapa 5?"
 
 ## Etapa 5 — Graphify — Segundo Cerebro
 
-`[█████░░░░░] Etapa 5 de 10`
+`[█████░░░] Etapa 5 de 8`
 
 ### O que e
 Um sistema que constroi um mapa mental automatico de cada projeto — quem e quem, o que depende do que, o que esta pendente.
@@ -223,96 +222,9 @@ Pronto para a Etapa 6?"
 
 ---
 
-## Etapa 6 — Instagram — Facebook App + Tokens
+## Etapa 6 — Mission Control 2.0
 
-`[██████░░░░] Etapa 6 de 10`
-
-### O que e
-Configuracao da conexao com o Instagram via Facebook Developers — a base necessaria para o auto-responder da Etapa 7.
-
-### Para que serve
-O Instagram nao deixa nenhum programa se conectar diretamente. E necessario criar um "app" na plataforma do Facebook e obter tokens de acesso. Essa etapa faz isso de forma guiada.
-
-### Como voce vai usar no dia-a-dia
-Configuracao unica — depois de feito, o auto-responder usa esses tokens automaticamente.
-
-### AVISO IMPORTANTE — leia antes de executar:
-> "Antes de comecar, voce vai precisar de:
-> - Uma conta no Facebook Developers (developers.facebook.com) — pode usar sua conta normal do Facebook
-> - Acesso de administrador a sua pagina do Instagram/Facebook
->
-> O terminal vai te guiar em 6 etapas visuais. Nao precisa fazer nada sozinho — so seguir as instrucoes na tela.
-> O browser vai abrir automaticamente em developers.facebook.com/apps.
->
-> Posso comecar?"
-
-> Aguarde o aluno confirmar antes de executar.
-
-### Instalacao
-Execute: `python3 setup/setup_instagram_app.py`
-
-O script vai (6 etapas visuais):
-1. Abrir developers.facebook.com/apps no browser automaticamente
-2. Guiar criacao do App (tipo: Business)
-3. Coletar App ID e App Secret
-4. Guiar conexao com a Pagina do Instagram
-5. Gerar Page Access Token de longa duracao (60 dias)
-6. Salvar credenciais em `~/.openclaw/workspace/.env`
-
-Apos o script:
-
-"Conexao com Instagram configurada!
-
-App ID: {APP_ID_MASCARADO}
-Token: {TOKEN_MASCARADO} (validade: 60 dias)
-Pagina conectada: {NOME_DA_PAGINA}
-
-Pronto para a Etapa 7?"
-
----
-
-## Etapa 7 — Instagram — Auto-Responder + DM
-
-`[███████░░░] Etapa 7 de 10`
-
-### O que e
-O sistema que responde automaticamente comentarios e mensagens diretas no Instagram, usando o Claude para gerar respostas personalizadas.
-
-### Para que serve
-Quando alguem comenta em um post ou manda DM, o sistema responde em segundos — sem voce precisar fazer nada. Aumenta engajamento e nao perde nenhum lead.
-
-### Como voce vai usar no dia-a-dia
-Funciona em segundo plano. Voce so ve as conversas que precisam de atencao humana.
-
-### Pronto para instalar?
-> Aguarde o aluno confirmar antes de executar.
-
-### Instalacao
-Execute: `python3 setup/setup_instagram_responder.py`
-
-O script vai:
-- Verificar se os tokens da Etapa 6 estao validos
-- Configurar webhook para receber notificacoes do Instagram
-- Definir regras de resposta (palavras-chave, tom, limites)
-- Testar resposta automatica em modo simulado
-- Ativar o auto-responder
-
-Apos o script:
-
-"Auto-responder do Instagram ativo!
-
-Configurado para responder:
-- Comentarios com palavras-chave definidas
-- DMs em ate 30 segundos
-- Tom: {TOM_CONFIGURADO}
-
-Pronto para a Etapa 8?"
-
----
-
-## Etapa 8 — Mission Control 2.0
-
-`[████████░░] Etapa 8 de 10`
+`[██████░░] Etapa 6 de 8`
 
 ### O que e
 Uma atualizacao do painel central de controle da operacao, com novos widgets de inteligencia e escala.
@@ -351,12 +263,12 @@ Pronto para a Etapa 9?"
 
 ---
 
-## Etapa 9 — Auditoria Tecnica
+## Etapa 7 — Auditoria Tecnica
 
-`[█████████░] Etapa 9 de 10`
+`[███████░] Etapa 7 de 8`
 
 ### O que e
-Uma revisao automatica que verifica todos os 15 componentes instalados na Semana 4, encontra problemas e corrige.
+Uma revisao automatica que verifica todos os 11 componentes instalados na Semana 4, encontra problemas e corrige.
 
 ### Para que serve
 Garante que tudo esta funcionando de verdade antes de encerrar.
@@ -370,37 +282,33 @@ Execute: `python3 setup/setup_audit_s4.py`
 
 **IMPORTANTE:** Esta etapa deve usar Agent com Opus/Codex para uma revisao profunda e independente.
 
-O script vai verificar os 15 checks abaixo:
-1. config.json com phase_completed >= 3
-2. week4_checkpoint.json presente
-3. Pasta ~/.operacao-ia/week4/ criada
-4. Codex CLI instalado e acessivel
-5. Automacao de revisao diaria configurada
-6. Symlink de memoria Desktop <-> Terminal (macOS)
-7. Skills registry criado e populado
-8. Pasta ~/.operacao-ia/graphs/ com ao menos 1 grafo
-9. Skill /graphify instalada
-10. ~/.openclaw/workspace/.env com IG_APP_ID e IG_PAGE_ACCESS_TOKEN
-11. ig_state.json presente e valido
-12. Webhook Instagram configurado
-13. Auto-responder ativo (processo rodando ou LaunchAgent)
-14. Mission Control 2.0 com novos widgets
-15. WEEK4_LOGS_DIR com ao menos 1 arquivo de log
+O script vai verificar os 11 checks abaixo:
+1. Claude Code CLI instalado e acessivel
+2. Plugin Codex presente (checkpoint ou plugin list)
+3. Symlink de memoria Desktop <-> Terminal (macOS)
+4. Skills sync git repo configurado
+5. Skills LaunchAgent / systemd timer ativo
+6. Pasta ~/.operacao-ia/graphs/ com ao menos 1 grafo
+7. Codex daily LaunchAgent (se automacao foi ativada)
+8. Codex projects.json presente
+9. config.json com phase_completed >= 3
+10. Checkpoints S4 etapas 1-8 com status done ou skipped
+11. Session logs dir existe
 
 Apos o script:
 
 "Auditoria concluida!
 
-{N} de 15 checks passaram.
+{N} de 11 checks passaram.
 {problemas corrigidos automaticamente}
 
 Pronto para finalizar?"
 
 ---
 
-## Etapa 10 — Finalizacao + Log + ZX Control 2.0
+## Etapa 8 — Finalizacao + Log + ZX Control 2.0
 
-`[██████████] Etapa 10 de 10`
+`[████████] Etapa 8 de 8`
 
 ### O que e
 Encerramento oficial da Semana 4 e do ciclo completo de 30 dias do ZX Control.
@@ -424,12 +332,11 @@ Apos o script, mostre exatamente esta mensagem final:
 Semana 4 concluida! ZX Control completo.
 
 O que voce tem agora:
-- Revisor automatico Codex analisando seus projetos todo dia
+- Skill /codex-review para revisar projetos sob demanda
 - Memoria unificada Claude Desktop + Terminal (sem perda de contexto)
 - Skills e MCPs sincronizados entre maquinas
-- Segundo cerebro Graphify mapeando todos os projetos
-- Auto-responder no Instagram (comentarios + DMs em 30 segundos)
-- Mission Control 2.0 com visao completa da operacao
+- Graphify economizando 60-90% tokens em perguntas sobre projetos
+- Mission Control 2.0 com dashboard de todas as 4 semanas
 - Log de toda a operacao salvo no Supabase
 
 Comandos para o dia a dia:
