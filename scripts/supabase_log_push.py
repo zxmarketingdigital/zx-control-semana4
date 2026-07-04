@@ -22,6 +22,27 @@ from lib import DATA_DIR
 PENDING_PATH = DATA_DIR / "logs" / "pending_push.json"
 
 
+def _extract_supabase_creds(config):
+    """
+    Extrai (url, key) do config tolerando dois formatos:
+      - plano:    config['supabase_url'], config['supabase_anon_key']
+      - aninhado: config['supabase']['url'], config['supabase']['anon_key'|'service_key']
+    Retorna (url, key) com strings (possivelmente vazias).
+    """
+    config = config or {}
+    nested = config.get("supabase")
+    nested = nested if isinstance(nested, dict) else {}
+
+    url = config.get("supabase_url") or nested.get("url") or ""
+    key = (
+        config.get("supabase_anon_key")
+        or nested.get("anon_key")
+        or nested.get("service_key")
+        or ""
+    )
+    return url.rstrip("/"), key
+
+
 def _load_pending():
     """Carrega lista de arquivos pendentes de envio."""
     if PENDING_PATH.exists():
@@ -62,11 +83,10 @@ def push(session_json_path, config):
     Returns:
         dict com {"id": "...", "status": "ok"} ou raise Exception
     """
-    supabase_url = config.get("supabase_url", "").rstrip("/")
-    anon_key = config.get("supabase_anon_key", "")
+    supabase_url, anon_key = _extract_supabase_creds(config)
 
     if not supabase_url or not anon_key:
-        raise ValueError("Supabase nao configurado — supabase_url ou supabase_anon_key ausentes")
+        raise ValueError("Supabase nao configurado — url ou key ausentes")
 
     session_json_path = Path(session_json_path)
     if not session_json_path.exists():
@@ -112,8 +132,7 @@ def push_with_retry(session_json_path, config, max_retries=3):
     Returns:
         tuple (success: bool, error: str ou None)
     """
-    supabase_url = config.get("supabase_url", "")
-    anon_key = config.get("supabase_anon_key", "")
+    supabase_url, anon_key = _extract_supabase_creds(config)
 
     if not supabase_url or not anon_key:
         _add_to_pending(session_json_path)

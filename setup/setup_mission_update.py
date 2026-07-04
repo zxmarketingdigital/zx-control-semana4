@@ -323,11 +323,11 @@ def main():
 
     # Verificar se MISSION_DIR existe
     if not MISSION_DIR.exists():
-        print(f"  AVISO: Mission Control nao encontrado em {MISSION_DIR}")
-        print("  Os patches serao no-op. Nenhum arquivo sera modificado.")
+        print(f"  Mission Control interno nao encontrado em {MISSION_DIR}.")
+        print("  Isso e ESPERADO — essa etapa e opcional e sera pulada (no-op).")
+        print("  Nenhum arquivo sera modificado e o setup continua normalmente.")
         print()
-        print("  Para instalar o Mission Control, acesse:")
-        print("  https://github.com/zxmarketingdigital/zxlab-mission-control")
+        print(f"  Seu dashboard local fica em: {DASHBOARD_HTML_PATH}")
         print()
         mark_checkpoint("step_6_mission_control", "done", "patches: 0/5 (MISSION_DIR ausente)")
         print("  [OK] Etapa 6 concluida — Mission Control nao encontrado (no-op).\n")

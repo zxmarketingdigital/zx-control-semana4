@@ -31,8 +31,10 @@ from lib import (
 LAUNCH_AGENTS_DIR = Path.home() / "Library" / "LaunchAgents"
 SYSTEMD_USER_DIR = Path.home() / ".config" / "systemd" / "user"
 
-PLUGIN_URL = "https://github.com/openai/codex-plugin-cc"
-PLUGIN_NAME = "codex-plugin-cc"
+PLUGIN_MARKETPLACE_REPO = "openai/codex-plugin-cc"
+PLUGIN_MARKETPLACE_NAME = "openai-codex"
+PLUGIN_NAME = "codex"
+PLUGIN_INSTALL_REF = f"{PLUGIN_NAME}@{PLUGIN_MARKETPLACE_NAME}"
 
 LAUNCH_AGENTS = [
     {
@@ -109,40 +111,58 @@ def ensure_claude_cli():
     return False
 
 
+def _plugin_installed():
+    """Retorna True se o plugin 'codex' aparece em `claude plugin list`."""
+    code, out, err = _run(["claude", "plugin", "list"])
+    return code == 0 and PLUGIN_NAME in out
+
+
 def ensure_codex_plugin():
     """
     Instala o plugin Codex no Claude Code se ainda nao estiver presente.
+
+    Fluxo correto (2 passos): o CLI `claude plugin install` NAO aceita URL de
+    GitHub — ele instala um plugin ja presente numa marketplace adicionada.
+    Entao primeiro adicionamos a marketplace, depois instalamos o plugin.
+
     Retorna True se o plugin esta disponivel apos a tentativa.
     """
     # Verificar se ja instalado: checar lista de plugins
-    code, out, err = _run(["claude", "plugin", "list"])
-    if code == 0 and PLUGIN_NAME in out:
+    if _plugin_installed():
         print(f"  [OK] Plugin '{PLUGIN_NAME}' ja instalado.")
         return True
 
     print(f"  Instalando plugin Codex do Claude Code...")
-    print(f"    {PLUGIN_URL}")
+    print(f"    marketplace: {PLUGIN_MARKETPLACE_REPO}")
     print()
-    code, out, err = _run(["claude", "plugin", "install", PLUGIN_URL], capture=False)
-    if code == 0:
-        print(f"  [OK] Plugin instalado com sucesso.")
+
+    # Passo 1 — adicionar a marketplace (idempotente; se ja existe, segue).
+    code, out, err = _run(
+        ["claude", "plugin", "marketplace", "add", PLUGIN_MARKETPLACE_REPO]
+    )
+    if code != 0 and "already" not in (out + err).lower():
+        print(f"  [AVISO] Nao foi possivel adicionar a marketplace: {err or out}")
+
+    # Passo 2 — instalar o plugin da marketplace.
+    code, out, err = _run(["claude", "plugin", "install", PLUGIN_INSTALL_REF])
+    if _plugin_installed():
+        print(f"  [OK] Plugin '{PLUGIN_NAME}' instalado com sucesso.")
         return True
 
-    # Fallback: mostrar instrucao manual
+    # Fallback: mostrar instrucao manual correta (2 passos).
     print()
     print("  [AVISO] Instalacao automatica falhou.")
-    print("  Instale manualmente dentro do Claude Code:")
-    print(f"    /plugin install {PLUGIN_URL}")
-    print()
-    print("  Ou execute no terminal:")
-    print(f"    claude plugin install {PLUGIN_URL}")
+    print("  Instale manualmente executando os DOIS comandos no terminal:")
+    print(f"    claude plugin marketplace add {PLUGIN_MARKETPLACE_REPO}")
+    print(f"    claude plugin install {PLUGIN_INSTALL_REF}")
     print()
     try:
         confirm = input("  Plugin ja instalado manualmente? [s/n]: ").strip().lower()
     except (EOFError, KeyboardInterrupt):
         confirm = "n"
         print("  [non-TTY] Instalacao automatica falhou. Aluno deve rodar manualmente:")
-        print(f"    claude plugin install {PLUGIN_URL}")
+        print(f"    claude plugin marketplace add {PLUGIN_MARKETPLACE_REPO}")
+        print(f"    claude plugin install {PLUGIN_INSTALL_REF}")
     return confirm in ("s", "sim", "y", "yes")
 
 
@@ -444,7 +464,7 @@ def main():
 
     # 2. Instalar plugin Codex
     print("  Verificando plugin Codex...")
-    print(f"    URL: {PLUGIN_URL}")
+    print(f"    marketplace: {PLUGIN_MARKETPLACE_REPO}")
     print()
     plugin_ok = ensure_codex_plugin()
     if plugin_ok:

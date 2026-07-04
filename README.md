@@ -20,7 +20,7 @@
 ## Como usar
 
 ```bash
-gh repo clone zxmarketingdigital/zx-control-semana4 ~/zx-control-semana4
+git clone https://github.com/zxmarketingdigital/zx-control-semana4.git ~/zx-control-semana4
 cd ~/zx-control-semana4
 claude
 ```
