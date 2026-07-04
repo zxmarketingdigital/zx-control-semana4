@@ -7,6 +7,7 @@ ZX Control Semana 4
 
 import getpass
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,9 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
 sys.path.insert(0, str(ROOT_DIR / "scripts"))
+
+# Fonte canonica da skill (fallback, ja instalada por copia local abaixo)
+GRAPHIFY_SKILL_URL = "https://github.com/zxmarketingdigital/graphify-skill"
 
 from lib import (
     GRAPHS_DIR,
@@ -64,16 +68,28 @@ def slugify(name):
 # ---------------------------------------------------------------------------
 
 def check_graphify_skill():
-    """Verifica se skill /graphify esta instalada."""
-    skill_path = Path.home() / ".claude" / "skills" / "graphify" / "SKILL.md"
+    """Garante a skill /graphify — instala a versao embutida no repo
+    (skills/graphify/) por copia local se ainda nao estiver instalada."""
+    skill_dir = Path.home() / ".claude" / "skills" / "graphify"
+    skill_path = skill_dir / "SKILL.md"
     if skill_path.exists():
         print(f"  Skill /graphify encontrada: {skill_path}")
         return True
-    else:
-        print(f"  AVISO: Skill /graphify nao encontrada em {skill_path}")
-        print(f"  Instale via ZX LAB HUB antes de usar o /graphify.")
-        print(f"  Continuando setup sem a skill...")
-        return False
+
+    # Nao instalada — instalar por copia local da skill embutida no repo
+    src_dir = ROOT_DIR / "skills" / "graphify"
+    if (src_dir / "SKILL.md").exists():
+        skill_dir.mkdir(parents=True, exist_ok=True)
+        for item in src_dir.iterdir():
+            if item.is_file():
+                shutil.copy(item, skill_dir / item.name)
+        print(f"  [OK] Skill /graphify instalada em {skill_dir}")
+        return True
+
+    print(f"  AVISO: Skill /graphify nao encontrada e nao embutida no repo.")
+    print(f"  Instale manualmente: /skill install {GRAPHIFY_SKILL_URL}")
+    print(f"  Continuando setup sem a skill...")
+    return False
 
 
 # ---------------------------------------------------------------------------

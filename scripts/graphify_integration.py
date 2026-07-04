@@ -52,8 +52,23 @@ def is_graphify_installed() -> bool:
 
 
 def install_graphify() -> bool:
-    """Instala skill /graphify via claude skill install."""
-    print(f"  Instalando skill /graphify...")
+    """Instala skill /graphify. Preferencia: copia local da skill embutida
+    no repo (skills/graphify/); fallback: claude skill install da URL canonica."""
+    # 1) Copia local — nao depende de rede nem de auth no GitHub
+    src_dir = ROOT_DIR / "skills" / "graphify"
+    if (src_dir / "SKILL.md").exists():
+        try:
+            GRAPHIFY_SKILL_PATH.mkdir(parents=True, exist_ok=True)
+            for item in src_dir.iterdir():
+                if item.is_file():
+                    shutil.copy(item, GRAPHIFY_SKILL_PATH / item.name)
+            print(f"  [OK] Skill /graphify instalada (copia local) em {GRAPHIFY_SKILL_PATH}")
+            return True
+        except Exception as e:
+            print(f"  [AVISO] Copia local falhou: {e}")
+
+    # 2) Fallback — instalar da URL canonica (repo publico)
+    print(f"  Instalando skill /graphify de {GRAPHIFY_SKILL_URL}...")
     code, out, err = _run(
         ["claude", "skill", "install", GRAPHIFY_SKILL_URL],
         capture=False,
