@@ -16,6 +16,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from lib import (
     CHECKPOINT_PATH,
     now_iso,
+    bump_phase,
     load_config,
     save_config,
     mark_checkpoint,
@@ -55,11 +56,7 @@ def main():
     print()
 
     # Carrega config (necessario para Supabase push)
-    try:
-        config = load_config()
-    except (FileNotFoundError, ValueError) as exc:
-        print(f"  Aviso: config.json indisponivel ({exc}). Continuando sem Supabase.")
-        config = {}
+    config = load_config()  # cria o minimo se nao existir; backup + recria se corrompido (Supabase e opcional)
 
     # ------------------------------------------------------------------ [1/8]
     _print_progress(1, label="[1/8] Coletar dados da sessao")
@@ -146,14 +143,14 @@ def main():
     _print_progress(6, label="[6/8] Atualizar config.json")
     _sep()
 
-    config["phase_completed"] = 4
+    bump_phase(config, 4)  # nunca regride
     config["week4"] = {
         "completed": True,
         "completed_at": now_iso(),
     }
     try:
         save_config(config)
-        print("  config.json atualizado: phase_completed=4, week4.completed=True")
+        print(f"  config.json atualizado: phase_completed={config['phase_completed']}, week4.completed=True")
     except Exception as e:
         print(f"  Aviso: nao foi possivel salvar config.json: {e}")
 

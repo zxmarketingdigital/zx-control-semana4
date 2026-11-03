@@ -24,7 +24,7 @@ Ao concluir a Semana 4, o sistema registra automaticamente uma sessão de aprend
 ## Onde os dados ficam
 
 1. **Local** — `~/.operacao-ia/data/logs/` — formato JSON e Markdown, acessível apenas no seu computador
-2. **Supabase** — banco de dados do seu projeto, configurado na Semana 1, sob seu controle total
+2. **Supabase** — banco de dados do seu projeto (opcional, configurado por você), sob seu controle total
 
 ## Controle total
 

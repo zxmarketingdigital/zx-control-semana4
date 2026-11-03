@@ -5,7 +5,10 @@ Adaptado de lib.py da Semana 3, com paths de inteligencia e escala.
 """
 
 import json
+import re
+import os
 import platform
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -64,13 +67,139 @@ def ensure_structure():
         path.mkdir(parents=True, exist_ok=True)
 
 
-def load_config():
-    if not CONFIG_PATH.exists():
-        raise FileNotFoundError("config.json nao encontrado em ~/.operacao-ia/config/")
+def _minimal_config():
+    """Config minimo para quem instala este setup sem ter feito outro antes."""
+    return {
+        "output_dir": str(BASE_DIR),
+        "setup_date": datetime.now().date().isoformat(),
+        "phase_completed": 0,
+    }
+
+
+class ConfigBackupError(OSError):
+    """Nao foi possivel guardar copia de seguranca do config; o original NAO foi tocado."""
+
+
+def backup_config_copy(path):
+    """Copia (copy2) o config para <nome>.bak-<AAAAmmdd-HHMMSS>[-N], sem sobrescrever backup existente.
+
+    Confere que o destino existe com o mesmo tamanho. Em falha, o original fica intacto
+    e levanta ConfigBackupError (so entao o chamador pode recriar o config).
+    """
+    path = Path(path)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup = None
     try:
-        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"config.json invalido (JSON malformado): {exc}") from exc
+        n = 0
+        while backup is None:
+            candidate = path.with_name("%s.bak-%s%s" % (path.name, stamp, "-%d" % n if n else ""))
+            try:
+                # O_EXCL: a criação é atômica; se outro processo pegou o nome, tenta o próximo sufixo.
+                fd = os.open(str(candidate), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError:
+                n += 1
+                continue
+            backup = candidate
+            with os.fdopen(fd, "wb") as dst, open(str(path), "rb") as src:
+                shutil.copyfileobj(src, dst)
+            os.chmod(str(backup), 0o600)  # backup nunca herda permissao aberta do original
+        if not backup.is_file() or backup.stat().st_size != path.stat().st_size:
+            raise OSError("copia de seguranca incompleta")
+    except OSError as e:
+        try:
+            if backup is not None and backup.is_file():
+                backup.unlink()
+        except OSError:
+            pass
+        msg = ("Não consegui salvar uma cópia de segurança de {}: {}. "
+               "Verifique a permissão da pasta e rode de novo.".format(path, e))
+        print("  [ERRO] " + msg)
+        raise ConfigBackupError(msg) from e
+    return backup
+
+
+def ensure_config():
+    """Garante um config.json valido; nunca falha por ele estar ausente ou corrompido.
+
+    - Ausente: cria o minimo (aproveita tudo o que um setup anterior ja gravou).
+    - Corrompido ou nao-objeto: guarda backup config.json.bak-<timestamp> e recria.
+    """
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if CONFIG_PATH.exists():
+        try:
+            data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
+        except (OSError, ValueError, RecursionError):
+            pass
+        backup = backup_config_copy(CONFIG_PATH)  # ConfigBackupError: original fica intacto
+        print("  [aviso] config.json invalido — backup em {}".format(backup.name))
+        config = _minimal_config()
+        _write_text_atomic(CONFIG_PATH, json.dumps(config, ensure_ascii=False, indent=2))
+        return config
+    config = _minimal_config()
+    try:
+        # O_EXCL: nunca sobrescreve um config criado em paralelo por outra execucao
+        fd = os.open(str(CONFIG_PATH), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        # criado em paralelo (ou link quebrado): aproveita se for valido, sem sobrescrever nada
+        try:
+            data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
+        except (OSError, ValueError, RecursionError):
+            pass
+        print("  [aviso] config.json existe mas nao e legivel — confira {}".format(CONFIG_PATH))
+        return config
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(json.dumps(config, ensure_ascii=False, indent=2))
+    return config
+
+
+def _write_text_atomic(path, texto):
+    """Grava por arquivo temporario 0600 no mesmo diretorio + os.replace: nunca deixa config.json truncado."""
+    destino = os.path.realpath(str(path))
+    tmp = "%s.tmp-%d" % (destino, os.getpid())
+    try:
+        try:
+            os.unlink(tmp)  # sobra de execucao interrompida
+        except FileNotFoundError:
+            pass
+        with os.fdopen(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w", encoding="utf-8") as f:
+            f.write(texto)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, destino)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def load_config():
+    return ensure_config()
+
+
+def bump_phase(config, phase):
+    """phase_completed nunca regride: grava max(atual, phase)."""
+    valor = config.get("phase_completed", 0)
+    atual = 0
+    if not isinstance(valor, bool):
+        try:
+            atual = float(valor)
+        except OverflowError:
+            atual = float("inf") if valor > 0 else 0.0  # inteiro gigante: maior que qualquer fase, nunca sobrescreve
+        except (TypeError, ValueError):
+            # formato antigo em texto (ex.: "week5", "semana 5"): usa o numero que aparece nele
+            achou = re.search(r"\d+(?:\.\d+)?", str(valor))
+            atual = float(achou.group()) if achou else 0
+        if atual != atual or atual == float("-inf"):
+            atual = 0
+    if phase > atual:  # nunca reduz o valor existente (nem reescreve se ja for >= phase)
+        config["phase_completed"] = phase
+    return config
 
 
 def save_config(config):

@@ -2,6 +2,7 @@
 """
 Etapa 1 — Base Semana 4
 Boas-vindas, diagnostico e criacao da estrutura para S4.
+Nao exige setup anterior: cria o config.json minimo se ele nao existir.
 """
 
 import shutil
@@ -41,20 +42,19 @@ def ask(prompt, secret=False):
         sys.exit(0)
 
 
-def check_phase(config):
-    """Verifica se Semanas 1, 2 e 3 foram concluidas."""
-    phase = config.get("phase_completed", 0)
-    if phase < 3:
-        print()
-        print("  ATENCAO: Semanas 1, 2 e 3 nao foram concluidas.")
-        print(f"  phase_completed atual: {phase} (esperado: >= 3)")
-        print()
-        print("  Conclua as semanas anteriores antes de continuar:")
-        print("    Semana 1: ~/zx-control-semana1/")
-        print("    Semana 2: ~/zx-control-semana2/")
-        print("    Semana 3: ~/zx-control-semana3/")
-        print()
-        sys.exit(1)
+def report_existing_install(config):
+    """Informativo: mostra o que ja existe de uma instalacao anterior. Nunca bloqueia."""
+    reaproveitados = [
+        label for key, label in (
+            ("supabase_url", "Supabase"),
+            ("evolution_api_key", "WhatsApp (Evolution)"),
+            ("resend_api_key", "Email (Resend)"),
+        ) if config.get(key)
+    ]
+    if reaproveitados:
+        print("  [OK] Configuracoes existentes que serao reaproveitadas: " + ", ".join(reaproveitados))
+    else:
+        print("  [OK] Nenhuma configuracao anterior encontrada — recursos opcionais (Supabase etc.) ficam desativados ate serem configurados.")
 
 
 def detect_scheduler():
@@ -119,18 +119,11 @@ def main():
     print("  Bem-vindo(a) a ultima semana do ZX Control!")
     print()
 
-    # --- Carrega config e valida fases anteriores ---
-    print("  Verificando pre-requisitos...")
-    try:
-        config = load_config()
-    except FileNotFoundError:
-        print()
-        print("  ERRO: config.json nao encontrado.")
-        print("  Execute primeiro o setup das Semanas 1, 2 e 3.")
-        sys.exit(1)
-
-    check_phase(config)
-    print("  [OK] Semanas 1, 2 e 3 concluidas.")
+    # --- Carrega (ou cria) o config.json: este setup nao exige setup anterior ---
+    print("  Preparando a base (config.json)...")
+    ensure_structure()
+    config = load_config()  # cria o minimo se nao existir; backup + recria se estiver corrompido
+    report_existing_install(config)
     print()
 
     # --- Detecta e salva plataforma ---

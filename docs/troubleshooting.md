@@ -86,8 +86,7 @@ print('Key:', 'OK' if key else 'AUSENTE')
 cat ~/.operacao-ia/logs/pending_push.json 2>/dev/null || echo "Sem pendentes"
 ```
 
-**Solução:** Se a chave estiver ausente, confira o `config.json` gerado na
-Semana 1 e preencha `supabase_url` + `supabase_anon_key` (ou o bloco aninhado
+**Solução:** Se a chave estiver ausente, confira o `config.json` (em `~/.operacao-ia/config/`) e preencha `supabase_url` + `supabase_anon_key` (ou o bloco aninhado
 `supabase: { url, anon_key }`). O envio tolera os dois formatos.
 
 O sistema faz retry automático de logs pendentes na próxima execução. Para forçar o retry manualmente:

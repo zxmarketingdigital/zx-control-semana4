@@ -31,9 +31,9 @@ Aluno executa setup_*.py
 
 ## Pré-requisitos
 
-- Semanas 1, 2 e 3 concluídas (`phase_completed >= 3` em config.json)
+- Não exige setup anterior — se você já tem outro setup instalado, ele aproveita o que estiver válido.
 - Claude Code CLI instalado
-- Supabase configurado (Semana 1)
+- Supabase (opcional): sem ele, o log de sessão fica só no seu computador
 
 ## Comandos do dia a dia pós-S4
 

@@ -46,7 +46,7 @@ Voce e o instrutor de setup da Semana 4. Seu papel e levar o aluno de uma operac
 Verificacao inicial do ambiente e criacao das pastas necessarias para a Semana 4.
 
 ### Para que serve
-Garante que as Semanas 1, 2 e 3 estao presentes e que a estrutura da Semana 4 esta no lugar antes de qualquer instalacao.
+Cria a base necessaria (pastas e config.json minimo) e aproveita o que ja existir de uma instalacao anterior. Este setup NAO exige nenhum setup anterior: nunca mande o aluno instalar outro setup.
 
 ### Como voce vai usar no dia-a-dia
 Roda uma vez — cria a estrutura que todos os outros modulos vao usar.
@@ -58,7 +58,7 @@ Roda uma vez — cria a estrutura que todos os outros modulos vao usar.
 Execute: `python3 setup/setup_base_s4.py`
 
 O script vai:
-- Verificar se `config.json` tem `phase_completed >= 3` (Semanas 1+2+3)
+- Criar `config.json` minimo se nao existir (se existir, reaproveita sem apagar nada; se estiver corrompido, guarda backup e recria)
 - Detectar o sistema operacional (macOS/Windows/Linux)
 - Verificar Python no PATH
 - Criar subpastas para inteligencia e escala (week4, graphs, codex, ig)
@@ -291,7 +291,7 @@ O script vai verificar os 11 checks abaixo:
 6. Pasta ~/.operacao-ia/graphs/ com ao menos 1 grafo
 7. Codex daily LaunchAgent (se automacao foi ativada)
 8. Codex projects.json presente
-9. config.json com phase_completed >= 3
+9. config.json presente (informativo)
 10. Checkpoints S4 etapas 1-8 com status done ou skipped
 11. Session logs dir existe
 
@@ -320,7 +320,7 @@ Encerramento oficial da Semana 4 e do ciclo completo de 30 dias do ZX Control.
 Execute: `python3 setup/setup_final_s4.py`
 
 O script vai:
-- Marcar phase_completed = 4 no config.json
+- Marcar phase_completed = max(atual, 4) no config.json (nunca regride)
 - Gerar log completo da sessao com todos os componentes instalados
 - Enviar log automaticamente para o Supabase (edge function session-log-s4)
 - Abrir Mission Control 2.0 no browser
@@ -372,7 +372,7 @@ Parabens! Voce completou os 30 dias do ZX Control.
 
 - **Produto:** ZX Control — Mentoria de 30 dias
 - **Semana 4:** Inteligencia & Escala
-- **Pre-requisito:** Semanas 1-3 concluidas (config.json com phase_completed >= 3)
+- **Pre-requisito:** nenhum setup anterior. Se o aluno ja tem outro setup instalado, aproveite o que estiver valido (config.json, Supabase); recursos opcionais ausentes (Supabase, Mission Control) ficam desativados com aviso. Nunca peca para instalar outro setup antes.
 - **Pasta base do aluno:** `~/.operacao-ia/`
 - **Pasta deste repositorio:** `~/zx-control-semana4/` (ou onde o aluno clonou)
 - **Modelo Claude:** claude-opus-4-7 (effort: high)

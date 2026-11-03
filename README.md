@@ -13,7 +13,7 @@
 
 ## Pré-requisitos
 
-- Semanas 1, 2 e 3 do ZX Control concluídas
+- Não exige setup anterior — se você já tem outro setup instalado, ele aproveita o que estiver válido.
 - Claude Code CLI instalado e autenticado
 - Node.js >= 20 (para o plugin Codex)
 - Python 3.9+

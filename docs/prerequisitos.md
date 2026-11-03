@@ -4,22 +4,19 @@ Antes de iniciar o Setup 4, confirme que todos os itens abaixo estão atendidos.
 
 ---
 
-## 1. Semanas 1, 2 e 3 concluídas
+## 1. Nenhum setup anterior é necessário
 
-O config gerado nas semanas anteriores deve estar presente. Para verificar:
+Não exige setup anterior — se você já tem outro setup instalado, ele aproveita o que estiver válido.
+
+A Etapa 1 cria o `~/.operacao-ia/config/config.json` mínimo se ele não existir (e, se estiver corrompido, guarda um backup `config.json.bak-<data>` e recria). Para ver quais campos existem hoje (sem exibir valores):
 
 ```bash
 python3 -c "
 import json, os
 path = os.path.expanduser('~/.operacao-ia/config/config.json')
-data = json.load(open(path))
-print('Phase completed:', data.get('phase_completed'))
+print(sorted(json.load(open(path))) if os.path.exists(path) else 'sem config.json — a Etapa 1 cria')
 "
 ```
-
-Resultado esperado: `phase_completed: 3` (ou superior).
-
-Se o arquivo não existir ou `phase_completed` for menor que 3, complete os setups anteriores antes de prosseguir.
 
 ---
 
@@ -87,7 +84,7 @@ Se não estiver instalado:
 
 | Item | Comando de verificação | Mínimo |
 |------|------------------------|--------|
-| Semanas anteriores | `cat ~/.operacao-ia/config/config.json` | `phase_completed: 3` |
+| Setup anterior | — | não é necessário |
 | Claude Code CLI | `claude --version` | versão atual |
 | Node.js | `node --version` | v20.0.0+ |
 | Python | `python3 --version` | 3.9+ |

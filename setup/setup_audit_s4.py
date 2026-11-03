@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Etapa 9 — Auditoria Tecnica
-Verifica 15 componentes instalados nas Semanas 1-4 e corrige automaticamente.
+Verifica os componentes instalados por este setup e corrige automaticamente.
 """
 
 import json
@@ -15,12 +15,12 @@ sys.path.insert(0, str(ROOT_DIR / "scripts"))
 
 from lib import (
     CODEX_DIR,
+    CONFIG_PATH,
     GRAPHS_DIR,
     PLATFORM,
     SESSION_LOGS_DIR,
     ensure_structure,
     load_checkpoint,
-    load_config,
     mark_checkpoint,
     now_iso,
 )
@@ -200,23 +200,23 @@ def check_codex_projects():
 
 
 def check_config_phase():
-    """Check 12: config.json com phase >= 3."""
+    """Check 12: config.json presente (informativo — nao exige nenhum setup anterior)."""
     try:
-        config = load_config()
+        # So le: a auditoria nunca cria, recria nem renomeia o config.json do aluno.
+        if not CONFIG_PATH.is_file():
+            return ("AVISO", "config.json ainda nao existe (sera criado na etapa 1)")
+        try:
+            config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            return ("AVISO", f"config.json ilegivel ou invalido ({e}) — a etapa 1 guarda uma copia e recria")
+        if not isinstance(config, dict):
+            return ("AVISO", "config.json nao e um objeto JSON — a etapa 1 guarda uma copia e recria")
         phase = config.get("phase_completed", config.get("phase", config.get("semana", config.get("week", None))))
         if phase is None:
-            return ("AVISO", "campo 'phase' nao encontrado no config.json")
-        try:
-            phase_num = int(str(phase).replace("semana", "").replace("week", "").strip())
-        except Exception:
-            return ("AVISO", f"phase={phase} (nao numerico)")
-        if phase_num >= 3:
-            return ("OK", f"phase={phase}")
-        return ("AVISO", f"phase={phase} — executar etapas anteriores")
-    except FileNotFoundError:
-        return ("AVISO", "config.json nao encontrado — executar etapa 1")
+            return ("OK", "config.json presente (sem fase registrada)")
+        return ("OK", f"config.json presente (phase={phase})")
     except Exception as e:
-        return ("ERRO", str(e))
+        return ("AVISO", f"config.json indisponivel: {e}")
 
 
 def check_s4_checkpoints():
@@ -274,7 +274,7 @@ CHECKS = [
     ("Graphify dir",              check_graphify_dir),
     ("Codex LaunchAgent daily",   check_codex_launchagent),
     ("Codex projects.json",       check_codex_projects),
-    ("Config.json phase >= 3",    check_config_phase),
+    ("Config.json presente",       check_config_phase),
     ("Checkpoints S4 etapas 1-8", check_s4_checkpoints),
     ("Session logs dir",          check_session_logs_dir),
 ]
@@ -309,7 +309,7 @@ def main():
 
     print("  Etapa 7 — Auditoria Tecnica")
     print()
-    print("  Verificando 11 componentes instalados nas Semanas 1-4.")
+    print("  Verificando 11 componentes deste setup.")
     print("  Fixes automaticos serao aplicados onde possivel.")
     print()
 
