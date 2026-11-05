@@ -377,8 +377,6 @@ Parabens! Voce completou os 30 dias do ZX Control.
 - **Pasta deste repositorio:** `~/zx-control-semana4/` (ou onde o aluno clonou)
 - **Modelo Claude:** claude-opus-4-7 (effort: high)
 - **Supabase edge function:** `{SUPABASE_URL}/functions/v1/session-log-s4`
-- **Instagram state:** `~/.openclaw/workspace/ig_state.json`
-- **Instagram env:** `~/.openclaw/workspace/.env`
 - **Grafos:** `~/.operacao-ia/graphs/`
 - **Codex automations:** `~/.codex/automations/project-review/`
 - **Week 4 logs:** `~/.operacao-ia/logs/week4/`
